@@ -9,18 +9,30 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    path('profile/', ProfileListAPI.as_view(), name='profile-detail'),
-    path('profile/create/', ProfileCreateAPI.as_view(), name='profile-create'),
-    path('profile/update/<int:pk>/', ProfileUpdateAPI.as_view(), name='profile-update'),
-    path('profile/delete/<int:pk>/', ProfileDeleteAPI.as_view(), name='profile-delete'),
+    path("auth/google/", GoogleAuthView.as_view(), name="google_auth"),
 ]
 
+# urlpatterns += [
+#     path('profile/', ProfileListAPI.as_view(), name='profile-detail'),
+#     path('profile/create/', ProfileCreateAPI.as_view(), name='profile-create'),
+#     path('profile/update/<int:pk>/', ProfileUpdateAPI.as_view(), name='profile-update'),
+#     path('profile/delete/<int:pk>/', ProfileDeleteAPI.as_view(), name='profile-delete'),
+# ]
+
 urlpatterns += [
+    # path('add-to-cart/', AddToCartAPI.as_view(), name='add_to_cart'),
+    # path('remove-from-cart/<int:cart_item_id>/', DeleteCartItemAPI.as_view(), name='remove_from_cart'),
     path('hero_page/', HeroPageListAPI.as_view(), name='hero-page-detail'),
-    path('cart/', ActiveOrdersListAPI.as_view(), name='active-order-cart'),
-    path('add_to_cart/', CartItemCreateAPI.as_view(), name='add-to-cart'),
-    path('order_details/', OrderDetailsListAPI.as_view(), name='order-details'),
-    path('order_post_details/', OrderPostDetailsListAPI.as_view(), name='order-post-details'),
+    path('menu_card/', MenuCardListAPI.as_view(), name='menu-card-detail'),
+    path('dish_details/<slug:slug>/add_to_cart/', DishDetailsCreateAPI.as_view(), name='menu-item-create'),
+    path('cart/', CartListAPI.as_view(), name='cart_items-detail'),
+    path('cart/delete/<slug:slug>/', CartItemDeleteAPI.as_view(), name='cart-items-delete'),
+    path('order/create/', CreateOrderAPI.as_view(), name='order-create'),
+    path('order/confirm/', ConfirmOrderPaymentAPI.as_view(), name='order-confirm'),
+    # path('cart/', ActiveOrdersListAPI.as_view(), name='active-order-cart'),
+    # path('add_to_cart/', CartItemCreateAPI.as_view(), name='add-to-cart'),
+    # path('order_details/', OrderDetailsListAPI.as_view(), name='order-details'),
+    # path('order_post_details/', OrderPostDetailsListAPI.as_view(), name='order-post-details'),
 ]
 
 urlpatterns += [
@@ -31,24 +43,10 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    path('order/', OrderListAPI.as_view(), name='order-detail'),
-    path('order/create/', OrderCreateAPI.as_view(), name='order-create'),
-    path('order/update/<int:pk>/', OrderUpdateAPI.as_view(), name='order-update'),
-    path('order/delete/<int:pk>/', OrderDeleteAPI.as_view(), name='order-delete'),
-]
-
-urlpatterns += [
-    path('order_item/', OrderItemListAPI.as_view(), name='order_item-detail'),
-    path('order_item/create/', OrderItemCreateAPI.as_view(), name='order_item-create'),
-    path('order_item/update/<int:pk>/', OrderItemUpdateAPI.as_view(), name='order_item-update'),
-    path('order_item/delete/<int:pk>/', OrderItemDeleteAPI.as_view(), name='order_item-delete'),
-]
-
-urlpatterns += [
-    path('delivery_address/', DeliveryAddressListAPI.as_view(), name='delivery_address-detail'),
-    path('delivery_address/create/', DeliveryAddressCreateAPI.as_view(), name='delivery_address-create'),
-    path('delivery_address/update/<int:pk>/', DeliveryAddressUpdateAPI.as_view(), name='delivery_address-update'),
-    path('delivery_address/delete/<int:pk>/', DeliveryAddressDeleteAPI.as_view(), name='delivery_address-delete'),
+    path('order/', ActiveOrderListAPI.as_view(), name='order-detail'),
+    path('past_order/', PastOrderListAPI.as_view(), name='past-order-detail'),
+#     path('order/update/<int:pk>/', OrderUpdateAPI.as_view(), name='order-update'),
+#     path('order/delete/<int:pk>/', OrderDeleteAPI.as_view(), name='order-delete'),
 ]
 
 urlpatterns += [

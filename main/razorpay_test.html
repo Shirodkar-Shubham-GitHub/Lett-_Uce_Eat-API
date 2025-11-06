@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Razorpay Payment</title>
+</head>
+<body>
+  <h2>Pay Now</h2>
+  <button id="pay-btn">Pay with Razorpay</button>
+
+  <!-- ✅ Razorpay Checkout script -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+  <script>
+    document.getElementById("pay-btn").addEventListener("click", async function () {
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzYyMjcyNTQ5LCJpYXQiOjE3NjIxODYxNDksImp0aSI6IjFkZjk4YjdmN2FiMjQyMGRhMTkyYTQ1YjU4ZmJhZjYxIiwidXNlcl9pZCI6IjIifQ.7Ov01Jbiv5TBWhVrlw0U0V9PAlgeYUL6RABJhWwG9zY";  // Replace this properly
+
+      // Step 1: Create Order from backend
+      const res = await fetch("http://127.0.0.1:8000/api/order/create/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({})
+      });
+
+      const data = await res.json();
+      console.log("Backend order data:", data);
+
+      if (!data.success) {
+        alert("Order creation failed: " + data.message);
+        return;
+      }
+
+      // Step 2: Razorpay options
+      const options = {
+        key: "rzp_test_RWYr4PyaK3nNl5", // your key id
+        amount: data.total_amount * 100,
+        currency: "INR",
+        name: "Lett'uce Eat",
+        description: "Food Order Payment",
+        order_id: data.razorpay_order_id,
+        handler: async function (response) {
+          console.log("Payment response:", response);
+
+          // Step 3: Confirm payment on backend
+          const confirmRes = await fetch("http://127.0.0.1:8000/api/order/confirm/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          });
+
+          const confirmData = await confirmRes.json();
+          console.log("Confirm response:", confirmData);
+
+          if (confirmData.success) {
+            alert("✅ Payment successful and confirmed!");
+          } else {
+            alert("⚠️ Payment done but confirmation failed!");
+          }
+        },
+        theme: {
+          color: "#3399cc"
+        }
+      };
+
+      // ✅ Ensure Razorpay is defined before using
+      if (typeof Razorpay === "undefined") {
+        alert("⚠️ Razorpay SDK not loaded properly. Check your script tag.");
+        return;
+      }
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+
+      rzp.on("payment.failed", function (response) {
+        alert("❌ Payment failed: " + response.error.description);
+        console.error(response.error);
+      });
+    });
+  </script>
+</body>
+</html>

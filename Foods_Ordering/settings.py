@@ -40,6 +40,16 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'main',
+    "corsheaders",
+
+    # Required for django-allauth
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
 ]
 
 # --------------- JWT Configurations --------------- #
@@ -54,6 +64,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10
 }
+
+AUTHENTICATION_BACKENDS = (
+    'allauth.account.auth_backends.AuthenticationBackend',  # This is required for allauth
+)
 
 AUTH_USER_MODEL = 'main.CustomUser'
 
@@ -72,12 +86,18 @@ SIMPLE_JWT = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # This is important
 ]
+
+SITE_ID = 1
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'Foods_Ordering.urls'
 
@@ -156,3 +176,25 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+GOOGLE_CLIENT_ID = "194969534911-ei3mhlh1bptve9j65ra21q68r3nhf8ah.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "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"
+
+# https://www.googleapis.com/auth/userinfo.email
+
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+
+EMAIL_HOST_USER = "shubhamshirodkar90@gmail.com"
+
+EMAIL_HOST_PASSWORD = "togi snjj nvtf bykr"
+EMAIL_PORT = 587
+
+ADMIN_EMAIL = "surajkhan9833@gmail.com"
+
+
+# --------------- Razorpay Configuration --------------- #
+
+RAZORPAY_KEY_ID = 'rzp_test_RWYr4PyaK3nNl5'
+RAZORPAY_KEY_SECRET = '5b4bi2UTHe1SL0sSjwTgW7mc'
