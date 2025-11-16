@@ -1,5 +1,3 @@
-from io import BytesIO
-from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from django.db import transaction
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -8,16 +6,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.pagination import LimitOffsetPagination
-from django.db.models import Sum, F
-from django.forms import DecimalField
 from django.db.models import Q
 from django.conf import settings
 import requests
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import EmailMessage
 import razorpay
-import hmac
-import hashlib
 
 
 class RegisterAPI(APIView):
@@ -446,7 +440,6 @@ class CartListAPI(APIView):
                 'message': str(e)
             })
 
-
 class CartItemDeleteAPI(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
@@ -492,7 +485,6 @@ class CartItemDeleteAPI(APIView):
                 "message": str(e),
                 "status": status.HTTP_500_INTERNAL_SERVER_ERROR
             })
-
 
 class CreateOrderAPI(APIView):
     permission_classes = [IsAuthenticated]
@@ -555,7 +547,6 @@ class CreateOrderAPI(APIView):
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 class ConfirmOrderPaymentAPI(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
@@ -575,7 +566,7 @@ class ConfirmOrderPaymentAPI(APIView):
 
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-            # ✅ Verify signature
+            # Verify signature
             try:
                 client.utility.verify_payment_signature({
                     'razorpay_order_id': order_id,
@@ -588,7 +579,7 @@ class ConfirmOrderPaymentAPI(APIView):
                     "message": "Signature verification failed."
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # ✅ Fetch payment details
+            # Fetch payment details
             payment = client.payment.fetch(payment_id)
 
             if payment.get("status") != "captured":
@@ -597,13 +588,17 @@ class ConfirmOrderPaymentAPI(APIView):
                     "message": f"Payment not captured yet (status: {payment.get('status')})."
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # ✅ Update orders
+            # Update Orders
             orders = Order.objects.filter(user=user, razorpay_order_id=order_id)
+
             if not orders.exists():
                 return Response({
                     "success": False,
                     "message": "No orders found for this Razorpay order ID."
                 }, status=status.HTTP_404_NOT_FOUND)
+
+            total_amount = 0
+            order_details_text = ""
 
             for order in orders:
                 order.status = OrderStatus.CONFIRMED
@@ -611,8 +606,85 @@ class ConfirmOrderPaymentAPI(APIView):
                 order.razorpay_signature = signature
                 order.save()
 
-            # ✅ Clear the user’s cart
+                total_amount += float(order.total_price)
+                order_details_text += (
+                    f"- {order.dish.name} (Qty: {order.quantity}) — ₹{float(order.total_price)}\n"
+                )
+
+            # Clear cart
             Cart.objects.filter(user=user, is_deleted=False).update(is_deleted=True)
+
+            # -----------------------------------------------------------
+            # 1️⃣ SEND EMAIL TO USER
+            # -----------------------------------------------------------
+            subject_user = "Your Order Has Been Successfully Placed!"
+            message_user = f"""
+            Dear {user.username},
+
+            Thank you for your order on Lett' uce Eat!
+
+            Your payment has been successfully received and your order is now confirmed.
+
+            ------------------------------------------------------------
+            ORDER DETAILS
+            {order_details_text}
+            ------------------------------------------------------------
+            Total Amount Paid: ₹{total_amount}
+            Payment ID: {payment_id}
+            Order Reference: {order_id}
+            ------------------------------------------------------------
+
+            Our team will begin processing your order shortly.
+
+            Thank you for choosing Lett' uce Eat!
+            """
+
+            EmailMessage(
+                subject_user,
+                message_user,
+                settings.EMAIL_HOST_USER,
+                [user.email]
+            ).send()
+
+            # -----------------------------------------------------------
+            # 2️⃣ SEND EMAIL TO ADMIN
+            # -----------------------------------------------------------
+            admin_email = settings.ADMIN_EMAIL
+
+            subject_admin = f"New Order Placed by {user.username}"
+            message_admin = f"""
+            Dear Admin,
+
+            A new order has been successfully confirmed on Lett' uce Eat.
+
+            ------------------------------------------------------------
+            USER DETAILS
+            Name: {user.username}
+            Email: {user.email}
+            ------------------------------------------------------------
+
+            ORDER DETAILS
+            {order_details_text}
+            ------------------------------------------------------------
+            Total Amount Paid: ₹{total_amount}
+            Razorpay Order ID: {order_id}
+            Razorpay Payment ID: {payment_id}
+            ------------------------------------------------------------
+
+            Please review the order and continue with the processing workflow.
+
+            Regards,
+            Lett' uce Eat System Notification
+            """
+
+            EmailMessage(
+                subject_admin,
+                message_admin,
+                settings.EMAIL_HOST_USER,
+                [admin_email]
+            ).send()
+
+            # -----------------------------------------------------------
 
             return Response({
                 "success": True,
@@ -633,7 +705,6 @@ class ConfirmOrderPaymentAPI(APIView):
                 "message": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 class CartClearAPI(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
@@ -652,7 +723,6 @@ class CartClearAPI(APIView):
             'message': 'Cart cleared successfully',
             'status': status.HTTP_200_OK
         })
-
 
 class PastOrderListAPI(APIView):
 
@@ -689,235 +759,6 @@ class PastOrderListAPI(APIView):
                 'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                 'message': str(e)
             })
-
-
-# class DeleteCartItemAPI(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def delete(self, request, cart_item_id):
-#         try:
-#             cart_item = CartItem.objects.get(id=cart_item_id, cart__user=request.user, cart__is_active=True)
-#             cart_item.delete()
-
-#             # Recalculate total amount after deletion
-#             cart_item.cart.calculate_total()
-
-#             return Response({
-#                 'success': True,
-#                 'message': 'Cart item removed successfully',
-#                 'status': status.HTTP_200_OK
-#             })
-#         except CartItem.DoesNotExist:
-#             return Response({
-#                 'success': False,
-#                 'message': 'Cart item not found',
-#                 'status': status.HTTP_404_NOT_FOUND
-#             })
-
-# class AddToCartAPI(APIView):
-#     permission_classes = [IsAuthenticated]  # Only authenticated users can access this endpoint
-
-#     def post(self, request):
-#         try:
-#             cart_data = request.data  # Expecting a list of items with 'dish_id' and 'quantity'
-#             user = request.user  # Get the authenticated user
-#             cart, created = Cart.objects.get_or_create(user=user, is_active=True)
-
-#             total_amount = 0
-#             cart_items = []
-
-#             for item in cart_data:
-#                 dish_id = item.get('dish_id')
-#                 quantity = item.get('quantity', 1)
-
-#                 # Get the MenuItem (Dish)
-#                 try:
-#                     dish = MenuItem.objects.get(id=dish_id)
-#                 except MenuItem.DoesNotExist:
-#                     return Response({
-#                         'success': False,
-#                         'message': f'Menu Item with ID {dish_id} not found',
-#                         'status': status.HTTP_404_NOT_FOUND,
-#                     })
-
-#                 # Create or update the CartItem
-#                 cart_item, created = CartItem.objects.update_or_create(
-#                     cart=cart, menu_item=dish,
-#                     defaults={'quantity': quantity}
-#                 )
-#                 cart_item.save()
-
-#                 cart_items.append(cart_item)
-#                 total_amount += cart_item.total_amount  # Accumulate the total
-
-#             # Update the total amount of the cart
-#             cart.calculate_total()
-
-#             # Return the updated cart data
-#             cart_serializer = CartSerializer(cart)
-
-#             return Response({
-#                 'success': True,
-#                 'message': 'Cart updated successfully',
-#                 'status': status.HTTP_200_OK,
-#                 'data': cart_serializer.data
-#             })
-
-#         except Exception as e:
-#             return Response({
-#                 'success': False,
-#                 'message': 'Something went wrong',
-#                 'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                 'error': str(e)
-#             })
-
-# class ActiveOrdersListAPI(APIView):
-#     permission_classes = [IsAuthenticated]
-#     authentication_classes = [JWTAuthentication]
-
-#     @transaction.atomic
-#     def get(self, request):
-#         try:
-#             order_items = OrderItem.objects.filter(
-#                 is_deleted=False,
-#                 order__customer=request.user,
-#                 order__status=OrderStatus.PENDING
-#             ).select_related('order', 'menu_item')  # Optimize
-
-#             menu_items = MenuItem.objects.filter(
-#                 order_items__in=order_items
-#             ).distinct()
-
-#             serializer = HeroPageSerializer(menu_items, many=True)
-
-#             total_quantity = order_items.aggregate(
-#                 total_qty=Sum('quantity')
-#             )['total_qty'] or 0
-
-#             total_amount = order_items.aggregate(
-#                 total_amt=Sum(
-#                     F('quantity') * F('price'),  # Make sure `price` exists on OrderItem
-#                     output_field=DecimalField()
-#                 )
-#             )['total_amt'] or 0.00
-
-#             return Response({
-#                 'success': True,
-#                 'status': status.HTTP_200_OK,
-#                 'message': 'Cart data fetched successfully',
-#                 'total_quantity': total_quantity,
-#                 'total_amount': float(total_amount),
-#                 'data': serializer.data
-#             })
-
-#         except Exception as e:
-#             return Response({
-#                 'success': False,
-#                 'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                 'message': str(e)
-#             })
-
-# class CartItemCreateAPI(APIView):
-#     def post(self, request):
-#         menu_item_id = request.data.get('menu_item_id')
-#         quantity = request.data.get('quantity', 1)
-
-#         try:
-#             menu_item = MenuItem.objects.get(id=menu_item_id)
-#         except MenuItem.DoesNotExist:
-#             return Response({'error': 'Menu item not found'}, status=status.HTTP_404_NOT_FOUND)
-
-#         # Get or create the active order (cart) for this user
-#         order, created = Order.objects.get_or_create(user=request.user, status='cart')
-
-#         # Add item to the cart
-#         order_item = OrderItem.objects.create(order=order, menu_item=menu_item, quantity=quantity)
-
-#         return Response({'message': 'Item added to cart'}, status=status.HTTP_201_CREATED)
-
-# class OrderPostDetailsListAPI(APIView):
-#     def post(self, request):
-#         try:
-#             order = Order.objects.get(user=request.user, status='cart')
-#         except Order.DoesNotExist:
-#             return Response({'error': 'No active cart found'}, status=status.HTTP_404_NOT_FOUND)
-
-#         # Finalize the order
-#         order.status = 'ordered'
-#         order.ordered_at = timezone.now()
-#         order.save()
-
-#         return Response({'message': 'Order placed successfully'}, status=status.HTTP_200_OK)
-
-# class OrderDetailsListAPI(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request):
-#         try:
-#             # ========= ACTIVE ORDERS =========
-#             active_orders = Order.objects.filter(
-#                 is_deleted=False,
-#                 customer=request.user,
-#                 status=OrderStatus.PENDING
-#             ).prefetch_related('items__menu_item')
-
-#             active_data = []
-#             total_active_amount = 0.00
-
-#             for order in active_orders:
-#                 for item in order.items.all():
-#                     item_total = item.quantity * item.price
-#                     total_active_amount += float(item_total)
-
-#                     active_data.append({
-#                         "ordered_date_time": order.created_at,
-#                         "menu_name": item.menu_item.name,
-#                         "price": float(item.price),
-#                         "quantity": item.quantity,
-#                         "item_total": float(item_total),
-#                         "order_status": order.status
-#                     })
-
-#             # ========= PAST ORDERS (DELIVERED) =========
-#             delivered_orders = Order.objects.filter(
-#                 is_deleted=False,
-#                 customer=request.user,
-#                 status=OrderStatus.DELIVERED
-#             ).prefetch_related('items__menu_item')
-
-#             past_data = []
-
-#             for order in delivered_orders:
-#                 for item in order.items.all():
-#                     past_data.append({
-#                         "ordered_date_time": order.created_at,
-#                         "menu_name": item.menu_item.name,
-#                         "price": float(item.price),
-#                         "order_status": order.status,
-#                         "delivery_date_time": order.updated_at
-#                     })
-
-#             return Response({
-#                 "success": True,
-#                 "status": status.HTTP_200_OK,
-#                 "message": "Order data fetched successfully.",
-#                 "active_orders": {
-#                     "total_amount": total_active_amount,
-#                     "number_of_orders": active_orders.count(),
-#                     "orders": active_data
-#                 },
-#                 "past_orders": {
-#                     "number_of_orders": delivered_orders.count(),
-#                     "orders": past_data
-#                 }
-#             })
-
-#         except Exception as e:
-#             return Response({
-#                 "success": False,
-#                 "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                 "message": str(e)
-#             })
 
 class MenuItemListAPI(APIView):
 
@@ -1257,160 +1098,6 @@ class PastOrderListAPI(APIView):
                 'message': str(e)
             })
 
-
-# class OrderCreateAPI(APIView):
-
-#     # permission_classes = [IsAuthenticated]
-#     # authentication_classes = [JWTAuthentication]
-    
-#     @transaction.atomic
-#     def post(self, request):
-
-#         try:
-#             # if not request.user.is_authenticated:
-#             #     return Response({
-#             #         'success': False,
-#             #         'status': status.HTTP_401_UNAUTHORIZED,
-#             #         'message': 'User is not authenticated'
-#             #     })
-
-#             data = {
-#                 "customer": request.data.get("customer"),
-#                 "menu_item": request.data.get("menu_item"),
-#                 "status": request.data.get("status"),
-#                 "total_amount": request.data.get("total_amount")
-#             }
-
-#             serializer = OrderSerializer(data=data)
-
-#             if serializer.is_valid():
-#                 serializer.save()
-#                 return Response({
-#                     "success": True,
-#                     "status": status.HTTP_201_CREATED,
-#                     "message": "Order created successfully"
-#                 })
-
-#             else:
-#                 return Response({
-#                     "success": False,
-#                     "status": status.HTTP_400_BAD_REQUEST,
-#                     "message": "Please input valid data.",
-#                     "errors": serializer.errors
-#                 })
-
-#         except Exception as e:
-           
-#             return Response({
-#             "success": False,
-#             "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             "message": str(e)
-#             })
-
-# class OrderUpdateAPI(APIView):
-
-#     # permission_classes = [IsAuthenticated]
-#     # authentication_classes = [JWTAuthentication]
-
-#     @transaction.atomic
-#     def put(self, request, pk):
-
-#         try:
-#             # if not request.user.is_authenticated:
-#             #     return Response({
-#             #         'success': False,
-#             #         'status': status.HTTP_401_UNAUTHORIZED,
-#             #         'message': 'User is not authenticated'
-#             #     })
-
-#             order = Order.objects.get(pk=pk)
-
-#         except Order.DoesNotExist:
-#             return Response({
-#                 'success': False,
-#                 'message': 'Order not found',
-#                 'status': status.HTTP_404_NOT_FOUND,
-#                 'data': []
-#             })
-        
-#         data = {
-#                 "customer": request.data.get("customer"),
-#                 "menu_item": request.data.get("menu_item"),
-#                 "status": request.data.get("status"),
-#                 "total_amount": request.data.get("total_amount")
-#             }
-
-#         serializer = OrderSerializer(order, data=data)
-
-#         if serializer.is_valid():
-#             try:
-#                 serializer.save()
-#                 return Response({
-#                     'success': True,
-#                     'message': 'Order updated successfully',
-#                     'status': status.HTTP_200_OK,
-#                     'data': serializer.data
-#                 })
-#             except Exception as e:
-#                 return Response({
-#                     'success': False,
-#                     'message': 'Something went wrong',
-#                     'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                     'data': serializer.errors
-#                 })
-#         else:
-#             return Response({
-#                 'success': False,
-#                 'message': 'Please enter valid input',
-#                 'status': status.HTTP_400_BAD_REQUEST,
-#                 'data': serializer.errors
-#             })
-
-# class OrderDeleteAPI(APIView):
-
-#     # permission_classes = [IsAuthenticated]
-#     # authentication_classes = [JWTAuthentication]
-
-#     @transaction.atomic
-#     def put(self, request, pk):
-
-#         try:
-
-#             try:
-#                 # if not request.user.is_authenticated:
-#                 #     return Response({
-#                 #         'success': False,
-#                 #         'status': status.HTTP_401_UNAUTHORIZED,
-#                 #         'message': 'User is not authenticated'
-#                 #     })
-
-#                 order = Order.objects.get(pk=pk)
-            
-#             except Order.DoesNotExist:
-#                 return Response({
-#                     'success': False,
-#                     'message': 'Order not found',
-#                     'status': status.HTTP_404_NOT_FOUND,
-#                     'data': []
-#                 })
-            
-#             order.is_deleted = True
-#             order.save()
-
-#             return Response({
-#                     'success': True,
-#                     'message': 'Order deleted successfully',
-#                     'status': status.HTTP_200_OK
-#                 })
-
-#         except Exception as e:
-#             return Response({
-#                 'success': False,
-#                 'message': 'Something went wrong. Please try again later',
-#                 'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
-#                 'data': str(e)
-#             })
-
 class ContactListAPI(APIView):
 
     permission_classes = [IsAuthenticated]
@@ -1563,7 +1250,7 @@ class ContactUpdateAPI(APIView):
                 'status': status.HTTP_400_BAD_REQUEST,
                 'data': serializer.errors
             })
-        
+
 class ContactDeleteAPI(APIView):
 
     # permission_classes = [IsAuthenticated]
@@ -1608,3 +1295,4 @@ class ContactDeleteAPI(APIView):
                 'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                 'data': str(e)
             })
+

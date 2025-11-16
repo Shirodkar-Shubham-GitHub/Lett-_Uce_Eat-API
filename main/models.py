@@ -96,6 +96,7 @@ PHONE_REGEX_VALIDATOR = RegexValidator(
 )
 
 
+
 class CustomUser(AbstractUser, TimeStampedSoftDeleteModel):
     profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
     about = models.TextField(null=True, blank=True)

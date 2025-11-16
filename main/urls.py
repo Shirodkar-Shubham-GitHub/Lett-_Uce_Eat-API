@@ -35,6 +35,7 @@ urlpatterns += [
     # path('order_post_details/', OrderPostDetailsListAPI.as_view(), name='order-post-details'),
 ]
 
+
 urlpatterns += [
     path('menu_item/', MenuItemListAPI.as_view(), name='menu_item-detail'),
     path('menu_item/create/', MenuItemCreateAPI.as_view(), name='menu_item-create'),
