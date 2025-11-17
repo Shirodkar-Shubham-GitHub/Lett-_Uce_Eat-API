@@ -148,24 +148,24 @@ Login → JWT Access + Refresh token
 Google Login → Quick OAuth login
 
 # 🍽️ Ordering Flow
-Browse menu items
-Add items to Cart
-Review cart
-Place order
-Complete payment (Razorpay Test Mode)
-Emails sent to user & admin with order details + payment confirmation
-View Active Orders
-After delivery → Moved to Past Orders
-Cart gets cleared automatically
+## 1. Browse menu items
+## 2. Add items to Cart
+## 3. Review cart
+## 4. Place order
+## 5. Complete payment (Razorpay Test Mode)
+## 6. Emails sent to user & admin with order details + payment confirmation
+## 7. View Active Orders
+## 8. After delivery → Moved to Past Orders
+## 9. Cart gets cleared automatically
 
 # 🧪 Testing
 ```bash
 python manage.py test
 ```
 # 🔮 Future Improvements
-## 🔗 Real payment gateway integration (live)
-## 📱 Frontend UI development (React / Angular / Django templates)
-## 🧾 Downloadable invoice PDFs
-## 📦 Live order tracking
-## 🛒 Saved addresses & multi-address support
-## ⭐ Enhanced review & rating system
+### 🔗 Real payment gateway integration (live)
+### 📱 Frontend UI development (React / Angular / Django templates)
+### 🧾 Downloadable invoice PDFs
+### 📦 Live order tracking
+### 🛒 Saved addresses & multi-address support
+### ⭐ Enhanced review & rating system
