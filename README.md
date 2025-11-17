@@ -141,46 +141,31 @@ python manage.py createsuperuser
 ```
 python manage.py runserver
 ```
-📦 Usage
-🔐 Authentication
+# 📦 Usage
+## 🔐 Authentication
 Register → Emails sent to admin & user
-
 Login → JWT Access + Refresh token
-
 Google Login → Quick OAuth login
 
-🍽️ Ordering Flow
+# 🍽️ Ordering Flow
 Browse menu items
-
 Add items to Cart
-
 Review cart
-
 Place order
-
 Complete payment (Razorpay Test Mode)
-
 Emails sent to user & admin with order details + payment confirmation
-
 View Active Orders
-
 After delivery → Moved to Past Orders
-
 Cart gets cleared automatically
 
-🧪 Testing
+# 🧪 Testing
 ```bash
 python manage.py test
 ```
-🔮 Future Improvements
-🔗 Real payment gateway integration (live)
-
-📱 Frontend UI development (React / Angular / Django templates)
-
-🧾 Downloadable invoice PDFs
-
-📦 Live order tracking
-
-🛒 Saved addresses & multi-address support
-
-⭐ Enhanced review & rating system
+# 🔮 Future Improvements
+## 🔗 Real payment gateway integration (live)
+## 📱 Frontend UI development (React / Angular / Django templates)
+## 🧾 Downloadable invoice PDFs
+## 📦 Live order tracking
+## 🛒 Saved addresses & multi-address support
+## ⭐ Enhanced review & rating system
