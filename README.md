@@ -42,16 +42,10 @@ This repository contains a **REST API-only backend**, ready for frontend integra
 - View **Past Orders**  
 - Review Food Items  
 - Contact for order cancellation  
-- User Dashboard APIs:
-  - Profile
-  - My Orders
-  - My Cart
-  - Change Password  
 
 ---
 
 ## 🛠️ Admin Features
-- **Session Management** (users & admins)  
 - Manage User Profiles  
 - Manage Food Items  
 - Manage Orders (active/pending/delivered)  
@@ -64,9 +58,7 @@ This repository contains a **REST API-only backend**, ready for frontend integra
 - JWT Authentication added  
 - Email notifications to admin and user after registration  
 - Google Login integration  
-- MenuCard Module: search bar + pagination (6 items per page)  
-- Dashboard APIs: My Cart, My Orders, Profile, Change Password  
-- Database migrated from **SQLite ➝ MySQL**  
+- MenuCard Module: search bar + pagination (6 items per page)   
 - Cart auto-clear after order placement  
 - **Razorpay Payment Gateway (Test Mode) integrated**  
 - **Email notifications for order payments and order details**  
@@ -77,7 +69,7 @@ This repository contains a **REST API-only backend**, ready for frontend integra
 # 🧑‍💻 Technologies Used
 - Python  
 - Django & Django REST Framework  
-- MySQL  
+- SQLite3  
 - JWT Authentication (SimpleJWT)  
 - Google OAuth  
 - SMTP Email  
