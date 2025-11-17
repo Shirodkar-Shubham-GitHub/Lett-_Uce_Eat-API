@@ -724,42 +724,6 @@ class CartClearAPI(APIView):
             'status': status.HTTP_200_OK
         })
 
-class PastOrderListAPI(APIView):
-
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
-
-    @transaction.atomic
-    def get(self, request):
-
-        try:
-            order_items = Order.objects.filter(is_deleted=False, user=request.user, status=OrderStatus.DELIVERED).order_by('-created_at')
-
-
-            serializer = PastOrderSerializer(order_items, many=True)
-
-            if not serializer.data:
-                return Response({
-                    'success': False,
-                    'message': 'No records found',
-                    'status': status.HTTP_404_NOT_FOUND,
-                    'data': []
-                })
-
-            return Response({
-                'success': True,
-                'status': status.HTTP_200_OK,
-                'message': 'Data fetched successfully',
-                'past_orders_list': serializer.data
-            })
-        
-        except Exception as e:
-            return Response({
-                'success': False,
-                'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
-                'message': str(e)
-            })
-
 class MenuItemListAPI(APIView):
 
     permission_classes = [IsAuthenticated]
