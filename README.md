@@ -107,7 +107,8 @@ Online_Food_Ordering_System/
 ├── media/                    
 ├── manage.py                 
 ├── requirements.txt          
-└── README.md                 
+└── README.md
+```             
 
 # 🛠️ Installation & Setup
 
@@ -115,30 +116,31 @@ Online_Food_Ordering_System/
 ```bash
 git clone https://github.com/Shirodkar-Shubham-GitHub/Online_Food_Ordering_System
 cd Online_Food_Ordering_System
+```   
 2️⃣ Create Virtual Environment
-bash
-Copy code
+```bash
 python -m venv my_env
 my_env\Scripts\activate      # Windows
 # or
 source my_env/bin/activate   # Linux/Mac
+```
 3️⃣ Install Requirements
-bash
-Copy code
+```bash
 pip install -r requirements.txt
+```
 4️⃣ Apply Migrations
-bash
-Copy code
+```bash
 python manage.py makemigrations
 python manage.py migrate
+```
 5️⃣ Create Superuser
-bash
-Copy code
+```
 python manage.py createsuperuser
+```
 6️⃣ Run the Server
-bash
-Copy code
+```
 python manage.py runserver
+```
 📦 Usage
 🔐 Authentication
 Register → Emails sent to admin & user
@@ -167,9 +169,9 @@ After delivery → Moved to Past Orders
 Cart gets cleared automatically
 
 🧪 Testing
-bash
-Copy code
+```bash
 python manage.py test
+```
 🔮 Future Improvements
 🔗 Real payment gateway integration (live)
 
