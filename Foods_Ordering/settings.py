@@ -11,21 +11,27 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xv&o8+tdvb-yhyw+)3ur!@fjr5f&-w-4(_@bog2amqhs2*tv4h'
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
 
 # Application definition
@@ -125,7 +131,7 @@ WSGI_APPLICATION = 'Foods_Ordering.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / env("DATABASE_NAME"),
     }
 }
 
@@ -177,24 +183,23 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-GOOGLE_CLIENT_ID = "194969534911-ei3mhlh1bptve9j65ra21q68r3nhf8ah.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET = "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"
+GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = env("GOOGLE_CLIENT_SECRET")
 
 # https://www.googleapis.com/auth/userinfo.email
 
-EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-
-EMAIL_HOST_USER = "shubhamshirodkar90@gmail.com"
-
-EMAIL_HOST_PASSWORD = "togi snjj nvtf bykr"
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = env.int("EMAIL_PORT")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
 EMAIL_PORT = 587
 
-ADMIN_EMAIL = "surajkhan9833@gmail.com"
+ADMIN_EMAIL = env("ADMIN_EMAIL")
 
 
 # --------------- Razorpay Configuration --------------- #
 
-RAZORPAY_KEY_ID = 'rzp_test_RWYr4PyaK3nNl5'
-RAZORPAY_KEY_SECRET = '5b4bi2UTHe1SL0sSjwTgW7mc'
+RAZORPAY_KEY_ID = env("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = env("RAZORPAY_KEY_SECRET")

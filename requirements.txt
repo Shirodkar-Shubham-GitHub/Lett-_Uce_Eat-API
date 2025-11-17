@@ -5,6 +5,7 @@ dj-rest-auth==7.0.1
 Django==5.2.5
 django-allauth==65.12.0
 django-cors-headers==4.9.0
+django-environ==0.12.0
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
 idna==3.10
