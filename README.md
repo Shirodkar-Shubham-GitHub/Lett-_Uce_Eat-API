@@ -1,29 +1,29 @@
-# 🍽️ Lett' uce Eat – Online Food Ordering System (Backend API)
+# Lett' uce Eat – Online Food Ordering System (Backend API)
 
 Lett' uce Eat is a **Django-based backend system** for an online food ordering platform.  
 This repository contains a **REST API-only backend**, ready for frontend integration.
 
-> ⚠️ **Note:** This is the backend API version of a previously deployed Django templates project: [Live website](https://shubham373shirodkar.pythonanywhere.com/).  
+> **Note:** This is the backend API version of a previously deployed Django templates project: [Live website](https://shubham373shirodkar.pythonanywhere.com/).  
 > The live website uses Django templates for full-stack functionality, but this repository contains **only the API**.
 
 ---
 
-# 🌐 Live Website (Previous Version)
+# Live Website (Previous Version)
 - Deployed using Django templates (full-stack)
 - Live URL: [https://shubham373shirodkar.pythonanywhere.com/](https://shubham373shirodkar.pythonanywhere.com/)
 - Current GitHub repo **does not have a live deployment**; it contains **backend APIs only**.
 
 ---
 
-# ⚙️ Backend-Only Project
-> 🧩 *This repository contains only the backend logic.*  
+# Backend-Only Project
+> *This repository contains only the backend logic.*  
 > The frontend UI is **not implemented**, but all APIs are ready for integration with any frontend framework.
 
 ---
 
-# 🚀 Features
+# Features
 
-## 👤 Authentication
+## Authentication
 - **JWT Authentication** (Secure token-based login system)  
 - **Email Verification**  
 - **Google Authentication / Login**  
@@ -31,7 +31,7 @@ This repository contains a **REST API-only backend**, ready for frontend integra
 
 ---
 
-## 🍔 User Features
+## User Features
 - Browse **Menu Items** (MenuCard with search + pagination)  
 - **Add to Cart / Update Cart**  
 - **Cart Auto-Clear After Successful Order**  
@@ -45,7 +45,7 @@ This repository contains a **REST API-only backend**, ready for frontend integra
 
 ---
 
-## 🛠️ Admin Features
+## Admin Features
 - Manage User Profiles  
 - Manage Food Items  
 - Manage Orders (active/pending/delivered)  
@@ -54,7 +54,7 @@ This repository contains a **REST API-only backend**, ready for frontend integra
 
 ---
 
-# 🔄 Latest Updates
+# Latest Updates
 - JWT Authentication added  
 - Email notifications to admin and user after registration  
 - Google Login integration  
@@ -66,7 +66,7 @@ This repository contains a **REST API-only backend**, ready for frontend integra
 
 ---
 
-# 🧑‍💻 Technologies Used
+# Technologies Used
 - Python  
 - Django & Django REST Framework  
 - SQLite3  
@@ -77,7 +77,7 @@ This repository contains a **REST API-only backend**, ready for frontend integra
 
 ---
 
-# 📁 Project Structure
+# Project Structure
 ```bash
 Online_Food_Ordering_System/
 │
@@ -102,7 +102,7 @@ Online_Food_Ordering_System/
 └── README.md
 ```             
 
-# 🛠️ Installation & Setup
+# Installation & Setup
 
 ### 1️⃣ Clone the Repository
 ```bash
@@ -133,13 +133,13 @@ python manage.py createsuperuser
 ```
 python manage.py runserver
 ```
-# 📦 Usage
-## 🔐 Authentication
+# Usage
+## Authentication
 Register → Emails sent to admin & user
 Login → JWT Access + Refresh token
 Google Login → Quick OAuth login
 
-# 🍽️ Ordering Flow
+# Ordering Flow
 #### 1. Browse menu items
 #### 2. Add items to Cart
 #### 3. Review cart
@@ -150,14 +150,14 @@ Google Login → Quick OAuth login
 #### 8. After delivery → Moved to Past Orders
 #### 9. Cart gets cleared automatically
 
-# 🧪 Testing
+# Testing
 ```bash
 python manage.py test
 ```
-# 🔮 Future Improvements
-#### 🔗 Real payment gateway integration (live)
-#### 📱 Frontend UI development (React / Angular / Django templates)
-#### 🧾 Downloadable invoice PDFs
-#### 📦 Live order tracking
-#### 🛒 Saved addresses & multi-address support
-#### ⭐ Enhanced review & rating system
+# Future Improvements
+#### Real payment gateway integration (live)
+#### Frontend UI development (React / Angular / Django templates)
+#### Downloadable invoice PDFs
+#### Live order tracking
+#### Saved addresses & multi-address support
+#### Enhanced review & rating system
